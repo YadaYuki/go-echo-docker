@@ -6,3 +6,9 @@ services:
     build:
       context: .
       dockerfile: ./docker/api/Dockerfile
+    volumes:
+      - ./:/go/src/github.com/ulwlu/go-rest
+    ports:
+      - "8081:1323"
+    restart: always
+    

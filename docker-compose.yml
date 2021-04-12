@@ -11,4 +11,12 @@ services:
     ports:
       - "8081:1323"
     restart: always
+
+  db:
+    container_name: mariadb_db
+    build:
+      context: .
+      dockerfile: ./docker/db/Dockerfile
+    env_file:
+      - .env.development
     

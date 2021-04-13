@@ -11,12 +11,20 @@ services:
     ports:
       - "8081:1323"
     restart: always
+    depends_on:
+      - db
 
   db:
     container_name: mariadb_db
     build:
       context: .
       dockerfile: ./docker/db/Dockerfile
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - ./mysql/mount:/var/lib/mysql
     env_file:
       - .env.development
-    
+  
+  

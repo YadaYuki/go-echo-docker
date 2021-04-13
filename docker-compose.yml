@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./docker/api/Dockerfile
     volumes:
-      - ./:/go/src/github.com/ulwlu/go-rest
+      - ./src:/go/src/github.com/YadaYuki/go-echo-docker
     ports:
       - "8081:1323"
     restart: always

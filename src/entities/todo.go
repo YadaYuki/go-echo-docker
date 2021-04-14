@@ -1,9 +1,8 @@
 package entities
 
-
 type Todo struct {
-	ID int
-	title string
+	ID    int
+	Title string
 }
 
 type Todos []Todo

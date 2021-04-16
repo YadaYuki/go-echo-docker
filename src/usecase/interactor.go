@@ -1,8 +1,6 @@
 package usecase
 
-import (
-	"go-echo-todo-app/entities"
-)
+import "go-echo-todo-app/entities"
 
 type TodoInteractor struct {
 	TodoRepository TodoRepository
@@ -10,5 +8,5 @@ type TodoInteractor struct {
 
 func (interactor *TodoInteractor) TodoById(identifier int) (todo entities.Todo, err error) {
 	todo, err = interactor.TodoRepository.FindById(identifier)
-	return
+	return todo, err
 }

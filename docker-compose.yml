@@ -9,7 +9,7 @@ services:
     volumes:
       - ./src:/go/src/github.com/YadaYuki/go-echo-docker
     ports:
-      - "8081:1323"
+      - "8081:8081"
     restart: always
     depends_on:
       - db

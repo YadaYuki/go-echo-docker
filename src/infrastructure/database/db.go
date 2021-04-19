@@ -11,18 +11,20 @@ type SqlHandler struct {
 	Conn *sql.DB
 }
 
-var DB_HOST = "database"
+var DB_HOST = "db"
 var DB_PORT = "3306"
-var DB_USER = "user"
-var DB_PASS = "password"
-var DB_NAME = "sampledb"
+var DB_USER = "root"
+var DB_PASS = "maguroman2"
+var DB_NAME = "todo_app"
 
 func New() database.SqlHandler {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME)
+	fmt.Println(connectionString)
 	connection, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		panic(err.Error)
 	}
+	// defer connection.Close()
 	sqlHandler := new(SqlHandler)
 	sqlHandler.Conn = connection
 	return sqlHandler
@@ -40,7 +42,6 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Row, error) {
 	rows, err := handler.Conn.Query(statement, args...)
-	fmt.Println(rows)
 	if err != nil {
 		return new(SqlRow), err
 	}

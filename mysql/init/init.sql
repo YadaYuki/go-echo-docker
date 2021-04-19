@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS todos (
   created_at datetime default current_timestamp
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO todos(id, title)
-VALUES (1, "テスト勉強" );
+VALUES (1, "テスト勉強");
 INSERT INTO todos(id, title)
-VALUES (2, "テスト勉強" );
+VALUES (2, "テスト勉強");
 INSERT INTO todos(id, title)
-VALUES (3, "テスト勉強" );
+VALUES (3, "テスト勉強");

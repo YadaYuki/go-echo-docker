@@ -3,8 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"go-echo-todo-app/interface/database"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type SqlHandler struct {
@@ -40,6 +40,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Row, error) {
 	rows, err := handler.Conn.Query(statement, args...)
+	fmt.Println(rows)
 	if err != nil {
 		return new(SqlRow), err
 	}
@@ -73,5 +74,6 @@ func (r SqlRow) Next() bool {
 }
 
 func (r SqlRow) Close() error {
+	// fmt.Println(r.Rows)
 	return r.Rows.Close()
 }

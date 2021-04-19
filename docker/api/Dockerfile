@@ -5,10 +5,12 @@ ENV GO111MODULE=on
 
 WORKDIR /go/src/github.com/ulwlu/go-rest
 
-COPY ./go.mod ./go.sum ./
+COPY ./src/go.mod ./src/go.sum ./
 RUN go mod download
 
-COPY ./ ./ 
+COPY ./src ./ 
 # ここで何やってんだ。。。？
+
+EXPOSE 8081
 
 CMD ["go","run","main.go"]

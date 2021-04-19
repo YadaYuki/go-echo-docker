@@ -1,10 +1,13 @@
-CREATE DATABASE IF NOT EXISTS sampledb;
-USE sampledb;
-
-CREATE TABLE IF NOT EXISTS users (
-  id          INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  lastname   VARCHAR(256) NOT NULL,
-  firstname  VARCHAR(256)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-INSERT INTO users(id, lastname, firstname) VALUES (1, "Yamada", "Takashi");
+CREATE DATABASE IF NOT EXISTS todo_app;
+USE todo_app;
+CREATE TABLE IF NOT EXISTS todos (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  title VARCHAR(256) NOT NULL,
+  created_at datetime default current_timestamp
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+INSERT INTO todos(id, title)
+VALUES (1, "テスト勉強");
+INSERT INTO todos(id, title)
+VALUES (2, "テスト勉強");
+INSERT INTO todos(id, title)
+VALUES (3, "テスト勉強");

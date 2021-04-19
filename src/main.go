@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/labstack/echo"
 	"go-echo-todo-app/infrastructure/database"
 	"go-echo-todo-app/infrastructure/router"
 	"go-echo-todo-app/interface/controller"
-
-	"fmt"
+	"os"
 )
 
 func main() {

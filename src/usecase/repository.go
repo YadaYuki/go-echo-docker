@@ -6,4 +6,5 @@ import (
 
 type TodoRepository interface {
 	FindById(int) (entities.Todo, error)
+	AddTodo(string) (int64, error)
 }

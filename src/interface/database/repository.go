@@ -12,9 +12,9 @@ type TodoRepository struct {
 func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err error) {
 	row, err := repo.Query("SELECT id, title FROM todos WHERE id = ?", identifier)
 	defer row.Close()
-	fmt.Print(row)
+	fmt.Println(row)
 	if err != nil {
-		panic(err.Error)
+		panic(err.Error())
 	}
 	var id int
 	var title string
@@ -25,4 +25,16 @@ func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err er
 	todo.ID = id
 	todo.Title = title
 	return todo, nil
+}
+
+func (repo *TodoRepository) AddTodo(todo string) (insertId int64, err error) {
+	result, err := repo.Execute("INSERT INTO todos(title) VALUES (?)", todo)
+	if err != nil {
+		panic(err.Error())
+	}
+	insertId, err = result.LastInsertId()
+	if err != nil {
+		panic(err.Error())
+	}
+	return insertId, nil
 }

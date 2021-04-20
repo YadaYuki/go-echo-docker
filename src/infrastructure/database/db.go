@@ -14,7 +14,6 @@ type SqlHandler struct {
 
 func New() database.SqlHandler {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", env.DB_USER, env.DB_PASSWORD, env.DB_HOST, env.DB_PORT, env.DB_NAME)
-	fmt.Println(connectionString)
 	connection, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		panic(err.Error)
@@ -70,6 +69,5 @@ func (r SqlRow) Next() bool {
 }
 
 func (r SqlRow) Close() error {
-	// fmt.Println(r.Rows)
 	return r.Rows.Close()
 }

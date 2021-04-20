@@ -23,7 +23,7 @@ func New(sqlHandler database.SqlHandler) *TodoController {
 
 func (controller *TodoController) GetById(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	todo, err := controller.Interactor.TodoById(id)
+	todo, err := controller.Interactor.FindById(id)
 	if err != nil {
 			return err
 	}

@@ -28,7 +28,7 @@ func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err er
 }
 
 func (repo *TodoRepository) AddTodo(todo string) (insertId int64, err error) {
-	result, err := repo.Execute("INSERT INTO todos(title) VALUES (%s)", todo)
+	result, err := repo.Execute("INSERT INTO todos(title) VALUES (?)", todo)
 	if err != nil {
 		panic(err.Error())
 	}

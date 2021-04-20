@@ -12,7 +12,7 @@ type TodoRepository struct {
 func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err error) {
 	row, err := repo.Query("SELECT id, title FROM todos WHERE id = ?", identifier)
 	defer row.Close()
-	fmt.Print(row)
+	fmt.Println(row)
 	if err != nil {
 		panic(err.Error())
 	}

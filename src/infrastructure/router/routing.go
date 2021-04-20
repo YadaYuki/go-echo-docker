@@ -6,6 +6,6 @@ import (
 )
 
 // InitRouting Initialize Router
-func InitRouting(e *echo.Echo,todoController *controller.TodoController) {
-	e.GET("/todos/:id", todoController.GetById)
+func InitRouting(e *echo.Echo, todoController *controller.TodoController) {
+	e.GET("/todos/:id", todoController.ReadTodoById)
 }

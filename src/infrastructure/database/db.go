@@ -19,7 +19,7 @@ func New() database.SqlHandler {
 	if err != nil {
 		panic(err.Error)
 	}
-	// defer connection.Close()
+  defer connection.Close()
 	sqlHandler := new(SqlHandler)
 	sqlHandler.Conn = connection
 	return sqlHandler
@@ -70,6 +70,5 @@ func (r SqlRow) Next() bool {
 }
 
 func (r SqlRow) Close() error {
-	// fmt.Println(r.Rows)
 	return r.Rows.Close()
 }

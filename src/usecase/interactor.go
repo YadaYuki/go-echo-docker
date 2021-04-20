@@ -11,7 +11,7 @@ func (interactor *TodoInteractor) FindById(identifier int) (todo entities.Todo, 
 	return todo, err
 }
 
-func (interactor *TodoInteractor) AddTodo(todo string) (insertId int, err error) {
+func (interactor *TodoInteractor) AddTodo(todo string) (insertId int64, err error) {
 	insertId, err = interactor.TodoRepository.AddTodo(todo)
 	return insertId, err
 }

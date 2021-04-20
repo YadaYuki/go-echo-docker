@@ -1,1 +1,3 @@
 mysql/
+
+curl -X POST -H "Content-Type: application/json" -d '{"title":"hogehgoe"}' localhost:8081/todos

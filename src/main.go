@@ -6,7 +6,6 @@ import (
 	"go-echo-todo-app/infrastructure/database"
 	"go-echo-todo-app/infrastructure/router"
 	"go-echo-todo-app/interface/controller"
-	"os"
 )
 
 func main() {

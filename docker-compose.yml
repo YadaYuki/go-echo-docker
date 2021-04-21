@@ -6,13 +6,11 @@ services:
     build:
       context: .
       dockerfile: ./docker/api/Dockerfile
-    volumes:
-      - ./src:/go/src/github.com/YadaYuki/go-echo-docker
     ports:
       - "8081:8081"
     restart: always
     networks:
-      - go_echo_hello_network
+      - go-echo-network
     depends_on:
       - db
     env_file:
@@ -26,20 +24,16 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - go_echo_hello_network
+      - go-echo-network
     volumes:
       - ./mysql/init:/docker-entrypoint-initdb.d
-      # - ./mysql/mount:/var/lib/mysql
       - ./docker/db/conf.d:/etc/mysql/conf.d
     command: --default-authentication-plugin=mysql_native_password
     env_file:
       - .env.development
 
 networks:
-  # default:
-  #   external:
-  #     name: bridge
-  go_echo_hello_network:
-    name: go_echo_hello_network
+  go-echo-network:
+    name: go-echo-network
     driver: bridge
     # external: true

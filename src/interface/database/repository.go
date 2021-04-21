@@ -9,31 +9,27 @@ type TodoRepository struct {
 }
 
 func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err error) {
-	row, err := repo.Query("SELECT id, title FROM todos WHERE id = ?", identifier)
-	defer row.Close()
+	// var todo entities.Todo
+	repo.First(todo, "id = ?", identifier)
 	if err != nil {
 		panic(err.Error())
 	}
-	var id int
-	var title string
-	row.Next()
-	if err = row.Scan(&id, &title); err != nil {
-		panic(err.Error())
-	}
-	todo.ID = id
-	todo.Title = title
+	// var id int
+	// var title string
+	// row.Next()
+	// if err = row.Scan(&id, &title); err != nil {
+	// 	panic(err.Error())
+	// }
+	// todo.ID = id
+	// todo.Title = title
 	return todo, nil
 }
 
-func (repo *TodoRepository) AddTodo(todo string) (insertId int64, err error) {
-	result, err := repo.Execute("INSERT INTO todos(title) VALUES (?)", todo)
-
-	if err != nil {
-		panic(err.Error())
+func (repo *TodoRepository) AddTodo(title string) (insertId int64, err error) {
+	todo := entities.Todo{Title: title}
+	db := repo.Create(&todo)
+	if db.Error != nil {
+		panic(db.Error)
 	}
-	insertId, err = result.LastInsertId()
-	if err != nil {
-		panic(err.Error())
-	}
-	return insertId, nil
+	return int64(todo.ID), nil
 }

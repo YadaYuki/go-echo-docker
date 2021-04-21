@@ -1,8 +1,8 @@
 package entities
 
 type Todo struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID    int    `gorm:"column:id"`
+	Title string `gorm:"column:title"`
 }
 
 type Todos []Todo

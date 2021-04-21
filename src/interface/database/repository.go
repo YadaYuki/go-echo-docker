@@ -9,19 +9,10 @@ type TodoRepository struct {
 }
 
 func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err error) {
-	// var todo entities.Todo
-	repo.First(todo, "id = ?", identifier)
+	repo.First(&todo, identifier)
 	if err != nil {
 		panic(err.Error())
 	}
-	// var id int
-	// var title string
-	// row.Next()
-	// if err = row.Scan(&id, &title); err != nil {
-	// 	panic(err.Error())
-	// }
-	// todo.ID = id
-	// todo.Title = title
 	return todo, nil
 }
 

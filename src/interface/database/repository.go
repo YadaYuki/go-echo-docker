@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"go-echo-todo-app/entities"
 )
 
@@ -12,7 +11,6 @@ type TodoRepository struct {
 func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err error) {
 	row, err := repo.Query("SELECT id, title FROM todos WHERE id = ?", identifier)
 	defer row.Close()
-	fmt.Println(row)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -29,6 +27,7 @@ func (repo *TodoRepository) FindById(identifier int) (todo entities.Todo, err er
 
 func (repo *TodoRepository) AddTodo(todo string) (insertId int64, err error) {
 	result, err := repo.Execute("INSERT INTO todos(title) VALUES (?)", todo)
+
 	if err != nil {
 		panic(err.Error())
 	}

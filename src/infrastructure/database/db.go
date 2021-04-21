@@ -18,9 +18,8 @@ func New() database.SqlHandler {
 	if err != nil {
 		panic(err.Error())
 	}
-	// defer connection.Close()
 
-	if err := connection.Ping();err != nil{
+	if err := connection.Ping(); err != nil {
 		panic(err.Error())
 	}
 

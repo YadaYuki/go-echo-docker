@@ -8,16 +8,26 @@ WORKDIR /go/src/github.com/ulwlu/go-rest
 # 作業ディレクトリの指定。以降の,Dockerコンテナ内におけるカレントディレクトリはここで指定したものになる。
 
 COPY ./src/go.mod ./src/go.sum ./
-# modファイルをWORKDIRにCOPYする。
+# modファイルをWORKDIRにCOPYする
+
+RUN mkdir shell
+COPY ./shell ./shell
+
+
+RUN apk update \
+    && apk add mariadb-client
+
 RUN go mod download
 
 COPY ./src ./ 
 # ここで何やってんだ。。。？
 
+RUN pwd
+
 # RUN mkdir build
 
-RUN go build -o main
+# RUN go build -o main
 
 EXPOSE 8081
 
-CMD ["./main"]
+CMD ["sh","./shell/start-server.sh"]

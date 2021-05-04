@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"github.com/labstack/echo"
 	"go-echo-todo-app/entities"
 	"go-echo-todo-app/interface/database"
 	"go-echo-todo-app/usecase"
 	"strconv"
+
+	"github.com/labstack/echo"
 )
 
 type TodoController struct {
@@ -41,6 +42,6 @@ func (controller *TodoController) CreateTodo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	c.String(200, string(insertId))
+	c.String(200, string(rune(insertId)))
 	return nil
 }

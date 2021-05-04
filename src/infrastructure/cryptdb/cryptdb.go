@@ -3,20 +3,22 @@ package cryptdb
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"go-echo-todo-app/infrastructure/env"
 	"go-echo-todo-app/interface/database"
+	"io"
+	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type SqlHandler struct {
 	Conn *sql.DB
 }
 
-var commonIV = []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}
-
-var keyText = "astaxie12798akljzmknm.ahkjkljl;k" // aes key
+var keyText = os.Getenv("KEY_TEXT") // aes key
 
 func New() database.SqlHandler {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", env.DB_USER, env.DB_PASSWORD, env.DB_HOST, env.DB_PORT, env.DB_NAME)
@@ -31,7 +33,7 @@ func New() database.SqlHandler {
 
 func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
 	res := SqlResult{}
-	cryptArgs, err := cryptDataArgs(args...)
+	cryptArgs, err := encryptDataArgs(args...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,25 +55,6 @@ func (handler *SqlHandler) Query(statement string, args ...interface{}) (databas
 	return row, nil
 }
 
-func cryptDataArgs(args ...interface{}) ([]interface{}, error) {
-	c, err := aes.NewCipher([]byte(keyText))
-	if err != nil {
-		panic("Failed to Instantiate Cipher")
-	}
-	cryptDataArray := []interface{}{}
-	cfb := cipher.NewCFBEncrypter(c, commonIV)
-	for _, arg := range args {
-		str, ok := arg.(string)
-		if !ok {
-			panic(fmt.Sprintf("Failed to Convert %s to string", arg))
-		}
-		cipherText := make([]byte, len([]byte(str)))
-		cfb.XORKeyStream(cipherText, []byte(str))
-		cryptDataArray = append(cryptDataArray, fmt.Sprintf("%x", cipherText))
-	}
-	return cryptDataArray, nil
-}
-
 type SqlResult struct {
 	Result sql.Result
 }
@@ -89,7 +72,28 @@ type SqlRow struct {
 }
 
 func (r SqlRow) Scan(dest ...interface{}) error {
-	return r.Rows.Scan(dest...)
+	columns, _ := r.Rows.Columns()
+	encryptDestPointerArray := make([]interface{}, len(columns))
+	for i := range encryptDestPointerArray {
+		encryptDestPointerArray[i] = new([]byte)
+	}
+	if err := r.Rows.Scan(encryptDestPointerArray...); err != nil {
+		return err
+	}
+	decryptDataArray, err := decryptDataArgs(encryptDestPointerArray...)
+	if err != nil {
+		panic(err.Error())
+	}
+	for i := range decryptDataArray {
+		// TODO: Correspond to other type(int,float...)
+		destItem, ok := dest[i].(*string)
+		if !ok {
+			panic("failed to cast destItem to *string")
+		}
+		// overwrite the value pointed to by the pointer
+		*destItem = string(decryptDataArray[i])
+	}
+	return nil
 }
 
 func (r SqlRow) Next() bool {
@@ -98,4 +102,64 @@ func (r SqlRow) Next() bool {
 
 func (r SqlRow) Close() error {
 	return r.Rows.Close()
+}
+
+func encryptDataArgs(args ...interface{}) ([]interface{}, error) {
+	encryptDataArgs := []interface{}{}
+	for _, arg := range args {
+		str, ok := arg.(string)
+		if !ok {
+			panic(fmt.Sprintf("Failed to Convert %s to str", str))
+		}
+		encryptData, err := getEncryptData([]byte(str))
+		if err != nil {
+			panic(err)
+		}
+		encryptDataArgs = append(encryptDataArgs, encryptData)
+	}
+	return encryptDataArgs, nil
+}
+
+func getEncryptData(data []byte) (encryptedData []byte, err error) {
+	c, err := aes.NewCipher([]byte(keyText))
+	if err != nil {
+		return nil, err
+	}
+	encryptedData = make([]byte, aes.BlockSize+len(data)) // BlockSize = 16
+	iv := encryptedData[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
+	cfb := cipher.NewCFBEncrypter(c, iv)
+	cfb.XORKeyStream(encryptedData[aes.BlockSize:], data)
+	return encryptedData, nil
+}
+
+func decryptDataArgs(encryptedDataPointerArray ...interface{}) ([][]byte, error) {
+	decryptDataArray := [][]byte{}
+	for _, encryptedData := range encryptedDataPointerArray {
+		byteEncryptedData, ok := encryptedData.(*[]byte)
+		if !ok {
+			panic(fmt.Sprintf("Failed to Convert to String. %s", *byteEncryptedData))
+		}
+		decryptData, err := getDecryptData(*byteEncryptedData)
+		if err != nil {
+			panic(err)
+		}
+		decryptDataArray = append(decryptDataArray, decryptData)
+	}
+	return decryptDataArray, nil
+}
+
+func getDecryptData(encryptedData []byte) (decryptedData []byte, err error) {
+	c, err := aes.NewCipher([]byte(keyText))
+	if err != nil {
+		return nil, err
+	}
+	iv := encryptedData[:aes.BlockSize]
+	targetEncryptedData := encryptedData[aes.BlockSize:]
+	decryptedData = make([]byte, len(targetEncryptedData))
+	cfb := cipher.NewCFBDecrypter(c, iv)
+	cfb.XORKeyStream(decryptedData, targetEncryptedData)
+	return decryptedData, nil
 }

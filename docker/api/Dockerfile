@@ -20,13 +20,8 @@ RUN apk update \
 RUN go mod download
 
 COPY ./src ./ 
-# ここで何やってんだ。。。？
 
 RUN pwd
-
-# RUN mkdir build
-
-# RUN go build -o main
 
 EXPOSE 8081
 

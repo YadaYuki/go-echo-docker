@@ -9,6 +9,7 @@ import (
 	"go-echo-todo-app/infrastructure/env"
 	"go-echo-todo-app/interface/database"
 	"io"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,7 +18,7 @@ type SqlHandler struct {
 	Conn *sql.DB
 }
 
-var keyText = "astaxie12798akljzmknm.ahkjkljl;k" // aes key
+var keyText = os.Getenv("KEY_TEXT") // aes key
 
 func New() database.SqlHandler {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", env.DB_USER, env.DB_PASSWORD, env.DB_HOST, env.DB_PORT, env.DB_NAME)
@@ -45,23 +46,62 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 }
 
 func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Row, error) {
-	// https://groups.google.com/g/golang-nuts/c/_AAB2x1SZBk?pli=1
 	rows, err := handler.Conn.Query(statement, args...)
 	if err != nil {
 		return new(SqlRow), err
 	}
 	row := new(SqlRow)
-	columns, _ := rows.Columns()
-	data := make([]interface{}, len(columns))
-	for i := range data {
-		data[i] = new(interface{})
-	}
-	rows.Next()
-	if err = rows.Scan(data...); err != nil {
-		panic(err.Error())
-	}
 	row.Rows = rows
 	return row, nil
+}
+
+type SqlResult struct {
+	Result sql.Result
+}
+
+func (r SqlResult) LastInsertId() (int64, error) {
+	return r.Result.LastInsertId()
+}
+
+func (r SqlResult) RowsAffected() (int64, error) {
+	return r.Result.RowsAffected()
+}
+
+type SqlRow struct {
+	Rows *sql.Rows
+}
+
+func (r SqlRow) Scan(dest ...interface{}) error {
+	columns, _ := r.Rows.Columns()
+	encryptDestPointerArray := make([]interface{}, len(columns))
+	for i := range encryptDestPointerArray {
+		encryptDestPointerArray[i] = new([]byte)
+	}
+	if err := r.Rows.Scan(encryptDestPointerArray...); err != nil {
+		return err
+	}
+	decryptDataArray, err := decryptDataArgs(encryptDestPointerArray...)
+	if err != nil {
+		panic(err.Error())
+	}
+	for i := range decryptDataArray {
+		// TODO: Correspond to other type(int,float...)
+		destItem, ok := dest[i].(*string)
+		if !ok {
+			panic("failed to cast destItem to *string")
+		}
+		// overwrite the value pointed to by the pointer
+		*destItem = string(decryptDataArray[i])
+	}
+	return nil
+}
+
+func (r SqlRow) Next() bool {
+	return r.Rows.Next()
+}
+
+func (r SqlRow) Close() error {
+	return r.Rows.Close()
 }
 
 func encryptDataArgs(args ...interface{}) ([]interface{}, error) {
@@ -95,18 +135,18 @@ func getEncryptData(data []byte) (encryptedData []byte, err error) {
 	return encryptedData, nil
 }
 
-func decryptDataArgs(encryptedDataArray ...interface{}) ([]interface{}, error) {
+func decryptDataArgs(encryptedDataPointerArray ...interface{}) ([][]byte, error) {
 	decryptDataArray := [][]byte{}
-	for _, encryptedData := range encryptedDataArray {
-		str, ok := encryptedData.(*string)
+	for _, encryptedData := range encryptedDataPointerArray {
+		byteEncryptedData, ok := encryptedData.(*[]byte)
 		if !ok {
-			panic(fmt.Sprintf("Failed to Convert %s to str", *str))
+			panic(fmt.Sprintf("Failed to Convert to String. %s", *byteEncryptedData))
 		}
-		decryptData, err := getDecryptData([]byte(*str))
+		decryptData, err := getDecryptData(*byteEncryptedData)
 		if err != nil {
 			panic(err)
 		}
-		decryptDataArray = append(decryptDataArray, &decryptData)
+		decryptDataArray = append(decryptDataArray, decryptData)
 	}
 	return decryptDataArray, nil
 }
@@ -122,32 +162,4 @@ func getDecryptData(encryptedData []byte) (decryptedData []byte, err error) {
 	cfb := cipher.NewCFBDecrypter(c, iv)
 	cfb.XORKeyStream(decryptedData, targetEncryptedData)
 	return decryptedData, nil
-}
-
-type SqlResult struct {
-	Result sql.Result
-}
-
-func (r SqlResult) LastInsertId() (int64, error) {
-	return r.Result.LastInsertId()
-}
-
-func (r SqlResult) RowsAffected() (int64, error) {
-	return r.Result.RowsAffected()
-}
-
-type SqlRow struct {
-	Rows *sql.Rows
-}
-
-func (r SqlRow) Scan(dest ...interface{}) error {
-	return r.Rows.Scan(dest...)
-}
-
-func (r SqlRow) Next() bool {
-	return r.Rows.Next()
-}
-
-func (r SqlRow) Close() error {
-	return r.Rows.Close()
 }

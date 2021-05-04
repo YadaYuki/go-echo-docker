@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS todos (
 --   title VARCHAR(256) NOT NULL,
 --   created_at datetime default current_timestamp
 -- ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
-INSERT INTO todos(title)
-VALUES ("テスト勉強");
-INSERT INTO todos(title)
-VALUES ("テスト勉強");
-INSERT INTO todos(title)
-VALUES ("テスト勉強");
+-- INSERT INTO todos(title)
+-- VALUES ("テスト勉強");
+-- INSERT INTO todos(title)
+-- VALUES ("テスト勉強");
+-- INSERT INTO todos(title)
+-- VALUES ("テスト勉強");

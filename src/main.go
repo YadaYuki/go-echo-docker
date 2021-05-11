@@ -11,7 +11,6 @@ import (
 func main() {
 	sqlHandler := cryptdb.New()
 	todoController := controller.New(sqlHandler)
-	// fmt.Println(todoController.Interactor.TodoRepository.FindById(1))
 	e := echo.New()
 	router.InitRouting(e, todoController)
 	e.Logger.Fatal(e.Start(":8081"))

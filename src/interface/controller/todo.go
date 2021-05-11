@@ -2,7 +2,6 @@ package controller
 
 import (
 	"go-echo-todo-app/entities"
-	"go-echo-todo-app/interface/database"
 	"go-echo-todo-app/usecase"
 	"strconv"
 
@@ -13,12 +12,10 @@ type TodoController struct {
 	Interactor usecase.TodoInteractor
 }
 
-func New(sqlHandler database.SqlHandler) *TodoController {
+func New(repo usecase.TodoRepository) *TodoController {
 	return &TodoController{
 		Interactor: usecase.TodoInteractor{
-			TodoRepository: &database.TodoRepository{
-				SqlHandler: sqlHandler,
-			},
+			TodoRepository: repo,
 		},
 	}
 }

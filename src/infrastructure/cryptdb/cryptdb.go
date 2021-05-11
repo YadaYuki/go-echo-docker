@@ -6,8 +6,8 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"go-echo-todo-app/entities"
 	"go-echo-todo-app/infrastructure/env"
-	"go-echo-todo-app/interface/database"
 	"io"
 	"os"
 
@@ -20,7 +20,7 @@ type SqlHandler struct {
 
 var keyText = os.Getenv("KEY_TEXT") // aes key
 
-func New() database.SqlHandler {
+func New() *SqlHandler {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local", env.DB_USER, env.DB_PASSWORD, env.DB_HOST, env.DB_PORT, env.DB_NAME)
 	connection, err := sql.Open("mysql", connectionString)
 	if err != nil {
@@ -31,7 +31,7 @@ func New() database.SqlHandler {
 	return sqlHandler
 }
 
-func (handler *SqlHandler) Execute(statement string, args ...interface{}) (database.Result, error) {
+func (handler *SqlHandler) Execute(statement string, args ...interface{}) (sql.Result, error) {
 	res := SqlResult{}
 	cryptArgs, err := encryptDataArgs(args...)
 	if err != nil {
@@ -45,7 +45,7 @@ func (handler *SqlHandler) Execute(statement string, args ...interface{}) (datab
 	return res, nil
 }
 
-func (handler *SqlHandler) Query(statement string, args ...interface{}) (database.Row, error) {
+func (handler *SqlHandler) Query(statement string, args ...interface{}) (*SqlRow, error) {
 	rows, err := handler.Conn.Query(statement, args...)
 	if err != nil {
 		return new(SqlRow), err
@@ -102,6 +102,35 @@ func (r SqlRow) Next() bool {
 
 func (r SqlRow) Close() error {
 	return r.Rows.Close()
+}
+
+func (r SqlHandler) FindById(identifier int) (todo entities.Todo, err error) {
+	row, err := r.Query("SELECT title FROM todos where id=?", identifier)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer row.Close()
+	var id int
+	var title string
+	row.Next()
+	if err = row.Scan(&title); err != nil {
+		panic(err.Error())
+	}
+	todo.ID = id
+	todo.Title = title
+	return todo, nil
+}
+
+func (r SqlHandler) AddTodo(todo string) (insertId int64, err error) {
+	result, err := r.Execute("INSERT INTO todos(title) VALUES (?)", todo)
+	if err != nil {
+		panic(err.Error())
+	}
+	insertId, err = result.LastInsertId()
+	if err != nil {
+		panic(err.Error())
+	}
+	return insertId, nil
 }
 
 func encryptDataArgs(args ...interface{}) ([]interface{}, error) {

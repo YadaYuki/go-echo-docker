@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-echo-todo-app/infrastructure/cryptdb"
+	"go-echo-todo-app/infrastructure/gormdb"
 	"go-echo-todo-app/infrastructure/router"
 	"go-echo-todo-app/interface/controller"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	sqlHandler := cryptdb.New()
+	sqlHandler := gormdb.New()
 	todoController := controller.New(sqlHandler)
 	e := echo.New()
 	router.InitRouting(e, todoController)

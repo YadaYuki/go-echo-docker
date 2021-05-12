@@ -6,6 +6,7 @@ import (
 	"go-echo-todo-app/entities"
 	"go-echo-todo-app/infrastructure/env"
 
+	"github.com/YadaYuki/angorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -24,6 +25,8 @@ func New() *SqlHandler {
 	if err != nil {
 		panic(err.Error())
 	}
+	angormPlugin := &angorm.AngormPlugin{}
+	db.Use(angormPlugin)
 	sqlHandler := new(SqlHandler)
 	sqlHandler.DB = db
 	return sqlHandler

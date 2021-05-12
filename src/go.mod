@@ -3,6 +3,7 @@ module go-echo-todo-app
 go 1.15
 
 require (
+	github.com/YadaYuki/angorm v0.0.0-20210512110233-9f1ed99c3639
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
@@ -13,5 +14,5 @@ require (
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
 	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect
 	gorm.io/driver/mysql v1.0.5
-	gorm.io/gorm v1.21.8
+	gorm.io/gorm v1.21.9
 )
